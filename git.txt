@@ -1,0 +1,7 @@
+git init - git폴더 만들기 커밋 내역이 여기에 들어간다고 보면됨
+git add . -현재 경로의 모든 폴더 및 파일을 스테이트에 저장
+git commit -m"[커밋 메시지]" - 스테이트에 있는 내역들을 뭐라 부를지 정하고 저장소에 저장하는 단계
+git remote add origin https://github.com/Rabbit-Jun/sw-project.git
+# 안되면 git push --set-upstream origin main https://github.com/Rabbit-Jun/sw-project.git
+git branch -M main
+git push -u origin main
