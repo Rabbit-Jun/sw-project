@@ -3,9 +3,9 @@ git add . -현재 경로의 모든 폴더 및 파일을 스테이트에 저장
 git commit -m"[커밋 메시지]" - 스테이트에 있는 내역들을 뭐라 부를지 정하고 저장소에 저장하는 단계
 git remote add origin https://github.com/Rabbit-Jun/sw-project.git
 # 안되면 git push --set-upstream origin main https://github.com/Rabbit-Jun/sw-project.git
-git branch -M main
-git push -u origin main
-
+git branch -M [브렌치 이름]
+git push -u origin [브렌치 이름]
+# 다른 사람과 합칠 때는 git push 하기전에 git pull origin [가져오고 싶은 사람의 브랜치명]
 
 # 각자의 브렌치를 만들어 사용해야 합니다.
 # main에는 검증이 끝난 것만 커밋해 주세요
