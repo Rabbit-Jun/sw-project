@@ -5,3 +5,10 @@ git remote add origin https://github.com/Rabbit-Jun/sw-project.git
 # 안되면 git push --set-upstream origin main https://github.com/Rabbit-Jun/sw-project.git
 git branch -M main
 git push -u origin main
+
+
+# 각자의 브렌치를 만들어 사용해야 합니다.
+# main에는 검증이 끝난 것만 커밋해 주세요
+git branch [새로운 브랜치명] -새로운 브랜치를 만들기
+git branch - 현재 존재하는 브랜치 목록을 확인할 수 있습니다. 
+git checkout [브랜치명] -원하는 브랜치로 전환하기 위해  여기서 [브랜치명]은 전환하려는 브랜치의 이름입니다. 예를 들어, git checkout main 명령은 main 브랜치로 전환합니다.
