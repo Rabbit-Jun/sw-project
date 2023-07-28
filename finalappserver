@@ -1,0 +1,30 @@
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const app = express();
+
+app.use(cors());
+app.use(bodyParser.json());
+
+let orders = [];
+
+app.get("/", (req, res) => {
+  res.json(orders); // 주문 목록을 JSON 형식으로 전송
+});
+
+app.post("/orders", (req, res) => {
+  orders.push(req.body.order);
+  res.status(200).send({ status: "Order received" });
+});
+
+app.delete("/delete-order/:index", (req, res) => {
+  const index = parseInt(req.params.index);
+  if (index >= 0 && index < orders.length) {
+    orders.splice(index, 1);
+    res.status(200).send({ status: "Order deleted" });
+  } else {
+    res.status(404).send({ status: "Order not found" });
+  }
+});
+
+app.listen(49890, () => console.log("Server is running on port 49890"));
