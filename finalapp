@@ -1,0 +1,514 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: '넘버오더',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MainPage(),
+    );
+  }
+}
+
+class MainPage extends StatefulWidget {
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  String inputValue = '';
+
+  @override
+  Widget build(BuildContext context) {
+    double containerWidth = MediaQuery.of(context).size.width * 0.9;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'NUMBER ORDER',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+          ),
+        ),
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      ),
+      backgroundColor: Colors.grey[200],
+      body: Column(
+        children: [
+          SizedBox(height: 20),
+          Container(
+            height: MediaQuery.of(context).size.height * 0.15,
+            width: double.infinity,
+            child: ClipOval(
+              child: Image.asset('assets/로고.jpg'),
+            ),
+          ),
+          SizedBox(height: 30),
+          TextField(
+            onChanged: (value) {
+              setState(() {
+                inputValue = value;
+              });
+            },
+            decoration: InputDecoration(
+              hintText: '숫자를 입력하세요',
+              border: OutlineInputBorder(),
+              fillColor: Colors.white,
+              filled: true,
+            ),
+          ),
+          SizedBox(height: 20),
+          InkWell(
+            onTap: () {
+              if (inputValue == '0001') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => SecondPage(inputValue: inputValue)),
+                );
+              } else if (inputValue == '0010') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => MenuPage()),
+                );
+              } else if (inputValue == '0100') { // 이 부분을 추가했습니다.
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ThirdPage()),
+                );
+              } else {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text('경고'),
+                      content: Text('다시 확인해보세요'),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('OK'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            },
+            child: Container(
+              height: 100,
+              width: containerWidth,
+              decoration: BoxDecoration(
+                color: Colors.blueAccent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Center(
+                child: Text(
+                  '주문하러가기',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+          SizedBox(
+            height: 20,
+            child: Center(
+              child: Text(
+                'NUMBER ORDER에서 주문하실 수 있어요!',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 40),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildSquareWidget('assets/image1.jpg', '방문이많아요'),
+              _buildSquareWidget('assets/image2.jpg', '오픈했어요'),
+              _buildSquareWidget('assets/image3.jpg', '재방문높아요'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSquareWidget(String imagePath, String text) {
+    return InkWell(
+      onTap: () {
+        // 각 정사각형을 눌렀을 때 수행할 동작
+      },
+      child: Container(
+        width: 100,
+        height: 150,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              imagePath,
+              width: 100,
+              height: 100,
+            ),
+            SizedBox(height: 10),
+            Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SecondPage extends StatefulWidget {
+  final String inputValue;
+
+  SecondPage({Key? key, required this.inputValue}) : super(key: key);
+
+  @override
+  _SecondPageState createState() => _SecondPageState();
+}
+
+class _SecondPageState extends State<SecondPage> {
+  List<String> menus = ['아메리카노', '카페라떼', '크로플', '치즈케이크', '딸기 케이크'];
+  String dropdownValue = '아메리카노';
+  List<String> orderList = [];
+  bool isOrderCompleted = false;
+
+  Future<void> placeOrder() async {
+    var url = Uri.parse('http://localhost:49890/orders');
+    var response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'order': orderList,
+      }),
+    );
+    if (response.statusCode == 200) {
+      setState(() {
+        isOrderCompleted = true;
+        orderList.clear();
+      });
+    } else {
+      print('Failed to place order.');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('NEW CAFE'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              '메뉴 목록',
+              style: TextStyle(fontSize: 24),
+            ),
+            DropdownButton<String>(
+              value: dropdownValue,
+              onChanged: (String? newValue) {
+                setState(() {
+                  dropdownValue = newValue!;
+                });
+              },
+              items: menus.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  orderList.add(dropdownValue);
+                });
+              },
+              child: Text('주문 추가', style: TextStyle(color: Colors.white)),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.blue,
+              ),
+            ),
+            Text(
+              '주문 목록',
+              style: TextStyle(fontSize: 24),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: orderList.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(orderList[index]),
+                  );
+                },
+              ),
+            ),
+            TextButton(
+              onPressed: placeOrder,
+              child: Text('주문하기', style: TextStyle(color: Colors.white)),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.blue,
+              ),
+            ),
+            if (isOrderCompleted)
+              AlertDialog(
+                title: Text('주문 완료'),
+                content: Text('주문이 완료되었습니다.'),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('확인'),
+                    onPressed: () {
+                      setState(() {
+                        isOrderCompleted = false;
+                      });
+                      Navigator.popUntil(context, ModalRoute.withName('/'));
+                    },
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MenuPage extends StatefulWidget {
+  @override
+  _MenuPageState createState() => _MenuPageState();
+}
+
+class _MenuPageState extends State<MenuPage> {
+  final List<String> menuItems = ['샌드위치', '요거트', '샐러드'];
+  final List<String> menuImages = [
+    'assets/san.jpg',
+    'assets/yo.jpg',
+    'assets/sal.jpg',
+  ];
+  final List<String> orderList = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('VEGKING'),
+      ),
+      body: ListView.builder(
+        itemCount: menuItems.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            leading: Image.asset(menuImages[index]),
+            title: index == 0
+                ? RichText(
+              text: TextSpan(
+                text: 'BEST ',
+                style: DefaultTextStyle.of(context).style.copyWith(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+                children: <TextSpan>[
+                  TextSpan(
+                      text: menuItems[index],
+                      style: DefaultTextStyle.of(context).style),
+                ],
+              ),
+            )
+                : Text(menuItems[index]),
+            onTap: () {
+              setState(() {
+                orderList.add(menuItems[index]);
+              });
+            },
+          );
+        },
+      ),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListView.builder(
+            shrinkWrap: true,
+            itemCount: orderList.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(orderList[index]),
+              );
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              child: Text('주문 완료'),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text('주문 완료'),
+                      content: Text('주문이 완료되었습니다.'),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('OK'),
+                          onPressed: () {
+                            setState(() {
+                              orderList.clear();
+                            });
+                            Navigator.popUntil(context, ModalRoute.withName('/'));
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ThirdPage extends StatefulWidget {
+  @override
+  _ThirdPageState createState() => _ThirdPageState();
+}
+
+class _ThirdPageState extends State<ThirdPage> {
+  List<String> orderList = [];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('GOODMILL'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 2,
+                childAspectRatio: 1.0,
+                padding: const EdgeInsets.all(20.0),
+                mainAxisSpacing: 20.0,
+                crossAxisSpacing: 20.0,
+                children: [
+                  _buildRoundedButton('assets/image4.jpg', '스파게티'),
+                  _buildRoundedButton('assets/image5.jpg', '찌개'),
+                  _buildRoundedButton('assets/image6.jpg', '라면'),
+                  _buildRoundedButton('assets/image7.jpg', '영양죽'),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),  // Adjust based on your design
+            Text(
+              '주문한 메뉴 목록: ${orderList.join(', ')}',
+              style: TextStyle(fontSize: 20),
+            ),
+            SizedBox(height: 10),  // Adjust based on your design
+            ElevatedButton(
+              child: Text('주문하기'),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: Text('주문 완료'),
+                      content: Text('주문이 완료되었습니다.'),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('확인'),
+                          onPressed: () {
+                            setState(() {
+                              orderList.clear();
+                            });
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+            SizedBox(height: 30),  // Provide a sufficient bottom margin
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoundedButton(String imagePath, String text) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          orderList.add(text);
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              imagePath,
+              fit: BoxFit.contain,
+            ),
+            Text(
+              text,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
