@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>주문 목록</title>
+    <style>
+      .order-container {
+        width: 100%;
+        max-width: 1200px; /* 최대 너비 설정 */
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap; /* 사각형들을 자동으로 줄바꿈하기 위해 필요 */
+        justify-content: center; /* 가로 가운데 정렬 */
+      }
+
+      .order-box {
+        width: 1200px;
+        height: 100px;
+        border: 2px solid #000;
+        border-radius: 30px; /* 둥근 테두리 설정 */
+        text-align: center;
+        line-height: 100px;
+        margin: 15px;
+        font-size: 24px;
+        overflow: hidden; /* 내용이 넘치는 경우 숨기기 */
+        cursor: pointer; /* 커서를 손가락 모양으로 변경 */
+      }
+
+      .order-box.completed {
+        background-color: red; /* 주문 완료된 사각형 배경색을 빨간색으로 설정 */
+      }
+    </style>
+  </head>
+  <body>
+    <h1>주문 목록</h1>
+
+    <div class="order-container" id="order-list">
+      <!-- 주문 데이터를 동적으로 생성하기 위해 빈 div 태그만 두기 -->
+    </div>
+
+    <script>
+      function displayOrders() {
+        fetch("http://localhost:49890/")
+          .then((response) => response.text())
+          .then((data) => {
+            const orderList = document.getElementById("order-list");
+            orderList.innerHTML = ""; // 기존 데이터 비우기
+
+            const orders = data.split("<p>").filter((str) => str.trim() !== "");
+            orders.forEach((order, index) => {
+              const orderBox = document.createElement("div");
+              orderBox.className = "order-box";
+              orderBox.textContent = `Order ${index + 1}: ${order}`;
+              orderList.appendChild(orderBox);
+
+              orderBox.addEventListener("click", () => {
+                completeOrder(index);
+              });
+            });
+          })
+          .catch((error) => console.error("Error fetching orders:", error));
+      }
+
+      function completeOrder(index) {
+        const orderList = document.getElementsByClassName("order-box");
+        orderList[index].classList.toggle("completed");
+      }
+
+      // 초기 주문 목록 가져오기
+      displayOrders();
+    </script>
+  </body>
+</html>
